@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"unsafe"
+	"syscall"
 )
 
 // ProgramSpec is an interface that can initialize a new Program
@@ -61,6 +62,11 @@ func NewProgramFromSpec(spec ProgramSpec) (Program, error) {
 // GetFd gets the file descriptor value of the Program
 func (bpf Program) GetFd() int {
 	return int(bpf)
+}
+
+// Close closes a bpf file descriptor of the Program
+func (bpf Program) Close() error {
+	return syscall.Close(bpf.GetFd())
 }
 
 // Pin perists the Program past the lifetime of the process that created it
