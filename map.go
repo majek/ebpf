@@ -68,6 +68,9 @@ func (m Map) GetRaw(key encoding.BinaryMarshaler, value *[]byte) (bool, error) {
 		}
 		return false, bpfErrNo(e)
 	}
+	keyValue = keyValue
+	value = value
+	ma = ma
 	return true, nil
 }
 
@@ -106,6 +109,8 @@ func (m Map) Delete(key encoding.BinaryMarshaler) (bool, error) {
 	if e == syscall.ENOENT {
 		return false, nil
 	}
+	ma = ma
+	keyValue = keyValue
 	return false, bpfErrNo(e)
 }
 
@@ -142,6 +147,9 @@ func (m Map) GetNextKeyRaw(key encoding.BinaryMarshaler, nextKey *[]byte) (bool,
 		}
 		return false, bpfErrNo(e)
 	}
+	ma = ma
+	keyValue = keyValue
+	nextKey = nextKey
 	return true, nil
 }
 
@@ -196,5 +204,8 @@ func (m Map) put(key encoding.BinaryMarshaler, value encoding.BinaryMarshaler, p
 		}
 		return false, bpfErrNo(e)
 	}
+	ma = ma
+	keyValue = keyValue
+	v = v
 	return true, nil
 }

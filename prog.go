@@ -51,6 +51,10 @@ func NewProgram(progType ProgType, instructions *Instructions, license string, k
 		}
 		return -1, bpfErrNo(e)
 	}
+	pca = pca
+	cInstructions = cInstructions
+	lic = lic
+	logs = logs
 	return Program(fd), nil
 }
 
