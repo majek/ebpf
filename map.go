@@ -54,12 +54,14 @@ func (m Map) GetRaw(key encoding.BinaryMarshaler, value *[]byte) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
+	ma := mapOpAttr{
+		mapFd: uint32(m),
+		key:   uint64(uintptr(unsafe.Pointer(&keyValue[0]))),
+		value: uint64(uintptr(unsafe.Pointer(&(*value)[0]))),
+	}
 	_, e := bpfCall(_MapLookupElem,
-		unsafe.Pointer(&mapOpAttr{
-			mapFd: uint32(m),
-			key:   uint64(uintptr(unsafe.Pointer(&keyValue[0]))),
-			value: uint64(uintptr(unsafe.Pointer(&(*value)[0]))),
-		}), 32)
+		unsafe.Pointer(&ma), 32)
 	if e != 0 {
 		if e == syscall.ENOENT {
 			return false, nil
@@ -91,11 +93,13 @@ func (m Map) Delete(key encoding.BinaryMarshaler) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
+	ma := mapOpAttr{
+		mapFd: uint32(m),
+		key:   uint64(uintptr(unsafe.Pointer(&keyValue[0]))),
+	}
 	_, e := bpfCall(_MapDeleteElem,
-		unsafe.Pointer(&mapOpAttr{
-			mapFd: uint32(m),
-			key:   uint64(uintptr(unsafe.Pointer(&keyValue[0]))),
-		}), 32)
+		unsafe.Pointer(&ma), 32)
 	if e == 0 {
 		return true, nil
 	}
@@ -125,12 +129,13 @@ func (m Map) GetNextKeyRaw(key encoding.BinaryMarshaler, nextKey *[]byte) (bool,
 	if err != nil {
 		return false, err
 	}
+	ma := mapOpAttr{
+		mapFd: uint32(m),
+		key:   uint64(uintptr(unsafe.Pointer(&keyValue[0]))),
+		value: uint64(uintptr(unsafe.Pointer(&(*nextKey)[0]))),
+	}
 	_, e := bpfCall(_MapGetNextKey,
-		unsafe.Pointer(&mapOpAttr{
-			mapFd: uint32(m),
-			key:   uint64(uintptr(unsafe.Pointer(&keyValue[0]))),
-			value: uint64(uintptr(unsafe.Pointer(&(*nextKey)[0]))),
-		}), 32)
+		unsafe.Pointer(&ma), 32)
 	if e != 0 {
 		if e == syscall.ENOENT {
 			return false, nil
@@ -170,13 +175,14 @@ func (m Map) put(key encoding.BinaryMarshaler, value encoding.BinaryMarshaler, p
 	if err != nil {
 		return false, err
 	}
+	ma := mapOpAttr{
+		mapFd: uint32(m),
+		key:   uint64(uintptr(unsafe.Pointer(&keyValue[0]))),
+		value: uint64(uintptr(unsafe.Pointer(&v[0]))),
+		flags: putType,
+	}
 	_, e := bpfCall(_MapUpdateElem,
-		unsafe.Pointer(&mapOpAttr{
-			mapFd: uint32(m),
-			key:   uint64(uintptr(unsafe.Pointer(&keyValue[0]))),
-			value: uint64(uintptr(unsafe.Pointer(&v[0]))),
-			flags: putType,
-		}), 32)
+		unsafe.Pointer(&ma), 32)
 	if e != 0 {
 		switch putType {
 		case _NoExist:
